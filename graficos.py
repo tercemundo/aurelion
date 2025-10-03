@@ -49,7 +49,7 @@ def generar_grafico_ventas_por_producto(archivos_config, columnas_config, print_
         print(Fore.RED + f"Ocurrió un error al generar el gráfico: {e}" + Style.RESET_ALL)
 
 def generar_grafico_ventas_por_dia(archivos_config, columnas_config, print_titulo_func):
-    print_titulo_func("Gráfico: Ventas por Día de la Semana (L-V)")
+    print_titulo_func("Gráfico: Ventas por Día de la Semana (L-D)")
     try:
         df_ventas = pd.read_excel(archivos_config['ventas'])
         df_detalle = pd.read_excel(archivos_config['detalle'])
@@ -64,15 +64,14 @@ def generar_grafico_ventas_por_dia(archivos_config, columnas_config, print_titul
 
         df_merged['fecha'] = pd.to_datetime(df_merged['fecha'])
         df_merged['dia_semana'] = df_merged['fecha'].dt.dayofweek
-        df_laborables = df_merged[df_merged['dia_semana'] < 5] # Lunes (0) a Viernes (4)
 
-        ventas_por_dia = df_laborables.groupby('dia_semana')['valor_total'].sum()
-        dias = {0: 'Lunes', 1: 'Martes', 2: 'Miércoles', 3: 'Jueves', 4: 'Viernes'}
+        ventas_por_dia = df_merged.groupby('dia_semana')['valor_total'].sum()
+        dias = {0: 'Lunes', 1: 'Martes', 2: 'Miércoles', 3: 'Jueves', 4: 'Viernes', 5: 'Sábado', 6: 'Domingo'}
         ventas_por_dia.index = ventas_por_dia.index.map(dias.get)
-        ventas_por_dia = ventas_por_dia.reindex(['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'])
+        ventas_por_dia = ventas_por_dia.reindex(['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'])
 
         fig = go.Figure(data=[go.Bar(x=ventas_por_dia.index, y=ventas_por_dia.values, text=ventas_por_dia.values, texttemplate='%{text:,.2f} €')])
-        fig.update_layout(title_text='Ventas Totales por Día de la Semana (Lunes a Viernes)', xaxis_title='Día de la Semana', yaxis_title='Ventas Totales (€)')
+        fig.update_layout(title_text='Ventas Totales por Día de la Semana (Lunes a Domingo)', xaxis_title='Día de la Semana', yaxis_title='Ventas Totales (€)')
         
         print("Mostrando gráfico interactivo en el navegador...")
         fig.show()
@@ -86,7 +85,7 @@ def iniciar_menu_graficos(archivos_config, columnas_config, print_titulo_func):
         print_titulo_func("Submenú de Gráficos")
         print("a) Ventas por Categoría")
         print("b) Top 15 Productos más vendidos")
-        print("c) Ventas por Día de la Semana (L-V)")
+        print("c) Ventas por Día de la Semana (L-D)")
         print("d) Volver al menú principal")
 
         opcion = input("\nSelecciona una opción de gráfico: ").lower()
